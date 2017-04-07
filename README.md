@@ -12,6 +12,12 @@ Re:VIEWを用いてepubやpdfを生成する方針で作業しています。作
 
 という方針で進めるつもりです。ただ、あまり自分の方では時間を取れそうに無いので、2より後はPRなどしていただけると幸いです。
 
+## 途中経過
+
+さしあたってepubのみ確認してます。気が向いた時に以下のDropBoxにスナップショットを置いています。
+
+[Dropbox上のepubのリンク](https://www.dropbox.com/s/zlpn5bo8bo3qwpb/book.epub?dl=0)
+
 # ライセンス
 
 <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/"><img alt="クリエイティブ・コモンズ・ライセンス" style="border-width:0" src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png" /></a><br />この 作品 は <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">クリエイティブ・コモンズ 表示 - 継承 4.0 国際 ライセンス</a>の下に提供されています。
