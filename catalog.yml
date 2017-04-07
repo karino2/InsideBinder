@@ -4,6 +4,7 @@ CHAPS:
   - intro.re
   - main_intro.re
   - systemcall.re
+  - driver_message.re
 
 APPENDIX:
 
