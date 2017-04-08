@@ -1,0 +1,21 @@
+sudo: required
+services: docker
+language: ruby
+branches:
+    only:
+        - master
+before_install:
+    - docker pull vvakame/docker-review
+script:
+    - docker run --rm -v `pwd`:/work vakame/docker-review /bin/sh -c "cd /work && review-pdfmaker config.yml && review-epubmaker config.yml"
+after_success:
+    - git config --global user.email ${GIT_EMAIL}
+    - git clone --quiet --branch=travis-build https://${GH_TOKEN}@github.com/karino2/InsideBinder travis-build > /dev/null
+    - cd travis-build
+    - cp -f $HOME/build/karino2/InsideBinder/book.pdf .
+    - cp -f $HOME/build/karino2/InsideBinder/book.epub .
+    - git add book.epub book.pdf
+    - git commit -m "Travis CI autocommit from travis build ${TRAVIS_BUILD_NUMBER}"
+    - git push -fq origin travis-build > /dev/null
+notifications:
+  email: false
