@@ -15,9 +15,11 @@ Re:VIEWを用いてepubやpdfを生成する方針で作業しています。作
 
 ## 途中経過
 
-さしあたってepubのみ確認してます。気が向いた時に以下のDropBoxにスナップショットを置いています。
+さしあたってepubのみ確認してます。
 
-[Dropbox上のepubのリンク](https://www.dropbox.com/s/zlpn5bo8bo3qwpb/book.epub?dl=0)
+- [epub版](https://github.com/karino2/InsideBinder/raw/travis-build/book.epub)
+- [pdf版](https://github.com/karino2/InsideBinder/raw/travis-build/book.pdf)
+
 
 # ライセンス
 
