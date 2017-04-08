@@ -11,11 +11,12 @@ script:
 after_success:
     - git config --global user.email ${GIT_EMAIL}
     - git clone --quiet --branch=travis-build https://${GH_TOKEN}@github.com/karino2/InsideBinder travis-build > /dev/null
-    - cd travis-build
+    - pushd travis-build
     - cp -f $HOME/build/karino2/InsideBinder/book.pdf .
     - cp -f $HOME/build/karino2/InsideBinder/book.epub .
     - git add book.epub book.pdf
     - git commit -m "Travis CI autocommit from travis build ${TRAVIS_BUILD_NUMBER}"
     - git push -fq origin travis-build > /dev/null
+    - popd
 notifications:
   email: false
