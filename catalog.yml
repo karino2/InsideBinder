@@ -6,6 +6,7 @@ CHAPS:
   - systemcall.re
   - driver_message.re
   - flat_binderobj.re
+  - threadpool.re
 
 APPENDIX:
 
