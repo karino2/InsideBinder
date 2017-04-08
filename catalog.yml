@@ -5,6 +5,7 @@ CHAPS:
   - main_intro.re
   - systemcall.re
   - driver_message.re
+  - flat_binderobj.re
 
 APPENDIX:
 
