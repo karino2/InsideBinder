@@ -1,4 +1,5 @@
 # 詳説 Binder
+[![TravisCI Build Status](https://travis-ci.org/karino2/InsideBinder.svg?branch=master)](https://travis-ci.org/karino2/InsideBinder)
 
 [Androidを支える技術](https://github.com/karino2/AndroidSupportTech) 執筆時に書いたBinderの原稿があふれてしまったので、フリーで公開する事にしました。
 
