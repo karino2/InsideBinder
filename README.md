@@ -19,6 +19,7 @@ Re:VIEWを用いてepubやpdfを生成する方針で作業しています。作
 
 - [epub版](https://github.com/karino2/InsideBinder/raw/travis-build/book.epub)
 - [pdf版](https://github.com/karino2/InsideBinder/raw/travis-build/book.pdf)
+  - pdf版はChromeで見ると文字化けしていますね。Adobe Readerで見てみてください （Travis CIで生成しているので、.travis.ymlの修正PR募集）
 
 
 # ライセンス
