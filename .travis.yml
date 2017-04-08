@@ -5,9 +5,9 @@ branches:
     only:
         - master
 before_install:
-    - docker pull vvakame/docker-review
+    - docker pull vvakame/review
 script:
-    - docker run --rm -v `pwd`:/work vakame/docker-review /bin/sh -c "cd /work && review-pdfmaker config.yml && review-epubmaker config.yml"
+    - docker run --rm -v `pwd`:/work vvakame/review /bin/sh -c "cd /work && review-pdfmaker config.yml && review-epubmaker config.yml"
 after_success:
     - git config --global user.email ${GIT_EMAIL}
     - git clone --quiet --branch=travis-build https://${GH_TOKEN}@github.com/karino2/InsideBinder travis-build > /dev/null
