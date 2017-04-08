@@ -699,14 +699,13 @@ BINDER_TYPE_HANDLEを送信した先が、そのハンドルの元となるポ�
 
 //image[6_10_4][BINDER_TYPE_HANDLEを送ると、今回はBINDER_TYPE_HANDLEのまま出てくる]
 
-zzz参照の貼り方を土井さんに確認
 @<img>{6_10_4}「BINDER_TYPE_HANDLEを送ると、今回はBINDER_TYPE_HANDLEのまま出てくる」と@<img>{6_10_2}「BINDER_TYPE_HANDLEを送るとBINDER_TYPE_BINDERとして出てくる」の違いに注目してください。
-どちらもBINDER_TYPE_HANDLEを送信していますが、受け取る側は@img{6_10_2}がBINDER_TYPE_BINDERに変換されるのに対し、
+どちらもBINDER_TYPE_HANDLEを送信していますが、受け取る側は@<img>{6_10_2}がBINDER_TYPE_BINDERに変換されるのに対し、
 @<img>{6_10_4}はBINDER_TYPE_HANDLEのままです。@<fn>{handleval}
 
-//footnote[handleval][なお、ハンドルの値はプロセスごとに異なります。zzz 5章の図「BとCでは別ハンドルの値となる」を参照]
+//footnote[handleval][なお、ハンドルの値はプロセスごとに異なります。@<img>{flat_binderobj|5_4_5}を参照]
 
-#@# TODO:別の章の図の参照の貼り方。@<img>{flat_binderobj/5_4_5}ではダメだった。
+#@# TODO:別の章の図の参照の貼り方。@<img>{flat_binderobj/5_4_5}ではダメだった。  zzz 5章の図「BとCでは別ハンドルの値となる」
 
 さて、ここからプロセスCからプロセスAにこのハンドルを送るとどうなるか？というと、
 この場合はこのハンドルの表す生のポインタが所属するプロセスに戻ってきたという事なので、BINDER_TYPE_BINDERとして名前のポインタが返ります。
