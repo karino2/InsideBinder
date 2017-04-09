@@ -2,24 +2,28 @@
 [![TravisCI Build Status](https://travis-ci.org/karino2/InsideBinder.svg?branch=master)](https://travis-ci.org/karino2/InsideBinder)
 
 [Androidを支える技術](https://github.com/karino2/AndroidSupportTech) 執筆時に書いたBinderの原稿があふれてしまったので、フリーで公開する事にしました。
+Re:VIEWのマークダウンで記述し、epubやpdfを生成しています。
 
-## 概要
+## 配布(スナップショット)
 
-Re:VIEWを用いてepubやpdfを生成する方針で作業しています。作業方針としては
+* [epub版](https://github.com/karino2/InsideBinder/raw/travis-build/book.epub)
+* [pdf版](https://github.com/karino2/InsideBinder/raw/travis-build/book.pdf)
+  * pdf版はChromeで見ると文字化けしていますね。Adobe Readerで見てみてください （Travis CIで生成しているので、.travis.ymlの修正PR募集）
 
-1. 手元のマークアップをRe:VIEW形式に直して一通りこのレポジトリに追加する
-2. 章参照などを直す
-3. 残っているTODOを潰す
 
-という方針で進めるつもりです。ただ、あまり自分の方では時間を取れそうに無いので、2より後はPRなどしていただけると幸いです。
+## お手伝いの募集
 
-## 途中経過
+本編執筆時の草稿段階のままの公開なので、幾つか簡単に直せる多くのTODOが残っています。
+特に大きい項目としては、以下の三つがあります。
 
-さしあたってepubのみ確認してます。
+* #1 参照が古いままになっている
+  * #2 章や節のナンバリングに古い数字が残っている
+* #3 見にくい図がいくつかある。
+* #4 生成されるpdfがChromeなどで文字化けしている。
 
-- [epub版](https://github.com/karino2/InsideBinder/raw/travis-build/book.epub)
-- [pdf版](https://github.com/karino2/InsideBinder/raw/travis-build/book.pdf)
-  - pdf版はChromeで見ると文字化けしていますね。Adobe Readerで見てみてください （Travis CIで生成しているので、.travis.ymlの修正PR募集）
+これらの他に、誤字やおかしな日本語、関数名の「()」漏れ、表記の不統一などもたくさんあります。
+
+自分の方ではこれらを仕上げる時間は取れそうにありません。そこで「手伝っても良いよ」という方が居ましたら、PR頂けたらと思います。
 
 
 # ライセンス
