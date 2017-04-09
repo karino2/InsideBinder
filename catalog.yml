@@ -8,6 +8,7 @@ CHAPS:
   - flat_binderobj.re
   - threadpool.re
   - common_intr.re
+  - java_aidl.re
 
 APPENDIX:
 
