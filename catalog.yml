@@ -10,6 +10,7 @@ CHAPS:
   - common_intr.re
   - java_aidl.re
   - systemservices.re
+  - summary.re
 
 APPENDIX:
 
