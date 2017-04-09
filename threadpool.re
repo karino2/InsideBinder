@@ -1,4 +1,5 @@
 = {threadpool-layer} 8.6 スレッドプールのレイヤ - BBinderとIPCThreadState
+#@# 旧8.4
 
 //lead{
 前節までで解説したbinderドライバさえあれば、サービスの実現に必要な事は全て出来ます。

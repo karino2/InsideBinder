@@ -7,6 +7,7 @@ CHAPS:
   - driver_message.re
   - flat_binderobj.re
   - threadpool.re
+  - common_intr.re
 
 APPENDIX:
 
