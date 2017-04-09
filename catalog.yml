@@ -9,6 +9,7 @@ CHAPS:
   - threadpool.re
   - common_intr.re
   - java_aidl.re
+  - systemservices.re
 
 APPENDIX:
 
