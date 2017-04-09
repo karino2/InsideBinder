@@ -16,10 +16,10 @@ Re:VIEWのマークダウンで記述し、epubやpdfを生成しています。
 本編執筆時の草稿段階のままの公開なので、幾つか簡単に直せる多くのTODOが残っています。
 特に大きい項目としては、以下の三つがあります。
 
-* #1 参照が古いままになっている
-  * #2 章や節のナンバリングに古い数字が残っている
-* #3 見にくい図がいくつかある。
-* #4 生成されるpdfがChromeなどで文字化けしている。
+* [#1](https://github.com/karino2/InsideBinder/issues/1) 参照が古いままになっている
+  * [#2](https://github.com/karino2/InsideBinder/issues/2) 章や節のナンバリングに古い数字が残っている
+* [#3](https://github.com/karino2/InsideBinder/issues/3) 見にくい図がいくつかある。
+* [#4](https://github.com/karino2/InsideBinder/issues/4) 生成されるpdfがChromeなどで文字化けしている。
 
 これらの他に、誤字やおかしな日本語、関数名の「()」漏れ、表記の不統一などもたくさんあります。
 
