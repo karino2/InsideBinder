@@ -21,7 +21,7 @@ Re:VIEWのマークダウンで記述し、epubやpdfを生成しています。
 * [#3](https://github.com/karino2/InsideBinder/issues/3) 見にくい図がいくつかある。
 * [#4](https://github.com/karino2/InsideBinder/issues/4) 生成されるpdfがChromeなどで文字化けしている。
 
-これらの他に、誤字やおかしな日本語、関数名の「()」漏れ、表記の不統一などもたくさんあります。
+これらの他に[issuesに上がっている物](https://github.com/karino2/InsideBinder/issues)、誤字やおかしな日本語、関数名の「()」漏れ、表記の不統一などもたくさんあります。
 
 自分の方ではこれらを仕上げる時間は取れそうにありません。そこで「手伝っても良いよ」という方が居ましたら、PR頂けたらと思います。
 
