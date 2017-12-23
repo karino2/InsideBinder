@@ -1,4 +1,4 @@
-= {threadpool-layer} 8.6 スレッドプールのレイヤ - BBinderとIPCThreadState
+={threadpool-layer} スレッドプールのレイヤ - BBinderとIPCThreadState
 #@# 旧8.4
 
 //lead{
@@ -26,7 +26,7 @@ BBinderに対応するハンドルを保持してメッセージを送信するB
 //}
 
 
-== 8.6.1 スレッドプールのレイヤの構成要素
+== スレッドプールのレイヤの構成要素
 
 スレッドプールのレイヤを構成する中心となるクラスはIPCThreadStateです。
 このクラスは各スレッドごとに一つインスタンスが出来るようなスレッドローカルなシングルトンで、IPCThreadState::self()と呼ぶと、
@@ -39,7 +39,7 @@ ioctlでデータを送受信するには、バイト配列に値をシリアラ
 
 IPCThreadStateはParcelを二つメンバに持ちます。mInとmOutです。
 mOutに書いておいたものが、binder_write_readのwrite_bufferの方に、mInはread_bufferの方に使われます。
-binder_write_readについては8.3.4などで扱いました。
+binder_write_readについては@<hd>{systemcall|binderドライバのioctlと読み書き}などで扱いました。
 
 IPCThreadStateのjoinThreadPool()というメソッドが、ioctlを呼び出して、結果を処理する、というループを回します。
 この時に上記のmInとmOutを設定したbinder_write_readを引数とします。
@@ -59,11 +59,11 @@ IPCThreadStateは、servicemanagerに登録するオブジェクトはBBinderで
 IPCThreadState, Parcel, IBinderとBBinderとBpBinder、そしておまけのProcessStateが、スレッドプールのレイヤを構成しているクラスです。
 
 
-== 8.6.2 Parcelとシリアライズ
+== Parcelとシリアライズ
 
 Parcelはシリアライズやデシリアライズの機能を備えたバッファです。
 つまり内部にバイト配列を持っていて、このバイト配列に値をコピーしたり、
-このバイト配列から値を復元したりします。8.4.4でちょっと登場しました。
+このバイト配列から値を復元したりします。@<hd>{driver_message|servicemanagerによるサービスハンドルの取得}でちょっと登場しました。
 
 大した事をするクラスでは無いのですが、今後良く登場するのでここで少し詳細に見ておきます。
 まず、Stirng16("android.os.IServiceManager")をバッファにコピーする事を考えます。
@@ -97,7 +97,7 @@ writeStringBinderというメソッドにBBinderのポインタを渡すと、
 内部でflat_binder_objectにラップして書きこみ、書き込んだ場所を覚えておいてくれて、
 ipcObjects()というメソッドでオフセットの配列を取得出来ます。
 
-8.5.3で見たサービスの登録の時に用意するバッファと同じバッファは、以下のように用意出来ます。
+@<hd>{flat_binderobj|オブジェクトの送信とflat_binder_object その1 - ユーザープロセス側}で見たサービスの登録の時に用意するバッファと同じバッファは、以下のように用意出来ます。
 
 //list[svrreg_parcel_ver][サービス登録の三つの引数の書き込み]{
 Parcel buf;
@@ -138,12 +138,12 @@ tr.data.ptr.offsets = buf.ipcObjects();
 tr.data.ofsset_size = buf.ipcObjectsCount();
 //}
 
-8.5.3のコードに比べると、バイト配列の扱いをほとんど気にする必要が無くなっているのが分かると思います。
+@<hd>{flat_binderobj|オブジェクトの送信とflat_binder_object その1 - ユーザープロセス側}のコードに比べると、バイト配列の扱いをほとんど気にする必要が無くなっているのが分かると思います。
 また、/* 1 */にあるようにoffsetsの配列を作ってくれる所がBinder専用のシリアライザっぽいですね。
 
 最後になりましたが、Parcelはbinder_transaction_dataのバッファを作る時にも、binder_write_readのバッファを作る時にも使えます。
 
-== 8.6.3 IPCThreadState概要
+== IPCThreadState概要
 
 IPCThreadStateは各スレッドごとに一つインスタンスが出来るような単位のオブジェクトです。
 そしてそのスレッドで、「ioctlを呼んで受信した結果を処理する」という処理をループするオブジェクトです。
@@ -162,12 +162,12 @@ IPCThreadState::self()と呼び出すと、同一スレッド内ならどこで�
 IPCThreadStateとは全然関係無いクラスの中でも、IPCThreadState()::self()と現在のスレッドのIPCThreadStateインスタンスを取り出して、
 そのインスタンスにリクエストなどを依頼する事が出来ます。
 
-具体例は8.6.7のBpBinderで登場します。
+具体例は@<hd>{BpBinderの実装 - transact()メソッドとIPCThreadState}のBpBinderで登場します。
 
 IPCThreadStateは、メッセージの受信対象がBBinderのサブクラスである、という前提で処理を行います。
 ここで少しメッセージの受信対象について補足しておきます。
 ioctlのメッセージ送受信には、必ず送る相手、受け取る相手がいます。
-この「相手」はハンドルで指定します。ハンドルが存在するためには、どこかしらでflat_binder_objectかtargetにポインタを入れてbinderドライバに渡してある必要があります。(8.5.4参照)
+この「相手」はハンドルで指定します。ハンドルが存在するためには、どこかしらでflat_binder_objectかtargetにポインタを入れてbinderドライバに渡してある必要があります。(@<hd>{flat_binderobj|オブジェクトの送信とflat_binder_object その2 - binderドライバと受信側}参照)
 通常のケースではハンドルはservicemanagerから取得する物ですが、
 幾つかのケースでは引数に渡されたオブジェクトがハンドルとして相手側に渡る事もあります。<fn>7.2.3のApplicationThreadなどがこのケースです。</fn>
 
@@ -183,13 +183,13 @@ ioctl呼び出しのループを実際に行うメソッドがjoinThreadPool()�
 次項でこのIPCThreadStateの本体とも言える、joinThreadPool()メソッドを見ていきます。
 
 
-== 8.6.4 IPCThreadStateのioctl()呼び出しループ - joinThreadPool()メソッドとBBinder
+== IPCThreadStateのioctl()呼び出しループ - joinThreadPool()メソッドとBBinder
 
 IPCThreadStateのjoinThreadPool()は、ioctlを呼び出して結果を処理する、というループを行うメソッドです。
 メソッドの名前は、このメソッドを呼ぶと以後このスレッドはスレッドプールの一員としてループを処理し続けます、というような意味合いでしょう。
 ループのメソッドでは普通ですが、このメソッドも一度呼び出すと終了メッセージまで戻ってきません。
 
-ioctlで受信したメッセージの先頭はコマンドIDになっていました。(8.4.2参照)
+ioctlで受信したメッセージの先頭はコマンドIDになっていました。(@<hd>{driver_message|ドライバに書き込むデータのフォーマットとコマンドID}参照)
 
 //list[cmdid_retrv][コマンドIDの取り出し]{
 // ioctl呼び出し後。結果はmInに入っている
@@ -253,7 +253,7 @@ IPCThreadStateは勝手にBC_REPLYとして結果を返信してくれます。
 このように、transact()メソッド以外の部分はBBinderの基底クラスとIPCThreadStateで勝手に処理してくれます。
 そこで次には、BBinderのtransact()とはどういうメソッドか？という話になります。
 
-== 8.6.4 BBinderのtransact()とonTransact()
+== BBinderのtransact()とonTransact()
 
 BBinderはリファレンスカウントに応じた寿命処理と、transact()メソッドを持ったクラスです。<fn>寿命管理周辺は別段難しい事も無いコードとなっているので本書では扱いません。</fn>
 
@@ -272,7 +272,7 @@ status_t BBinder::onTransact(
 //}
 
 先頭の引数、codeはbinder_transaction_dataのcodeに入っている、メソッドを表すIDです。
-これはサービスが独自に決めます。servicemanagerならSVC_MGR_ADD_SERVICEやSVC_MGR_CHECK_SERVICEなどでした(8.4.4参照)。
+これはサービスが独自に決めます。servicemanagerならSVC_MGR_ADD_SERVICEやSVC_MGR_CHECK_SERVICEなどでした(@<hd>{driver_message|servicemanagerによるサービスハンドルの取得}参照)。
 
 二番目の引数、Parcelのdataはメソッドの引数のデータが入ったParcelです。
 
@@ -335,24 +335,24 @@ class MyService1 : public BBinder {
 引数をdataからreadInt32()したりする、というのは少しまだ低レベルな要素が残っていますが、
 このMyService1の実装くらいまで来ると、だいぶ通信回りのコードは無くなって、提供する機能に集中出来るコードとなっていませんか？
 
-== 8.6.5 サービスの呼び出し側のコードとプロキシの必要性
+== サービスの呼び出し側のコードとプロキシの必要性
 #@# TODO: 「プロキシクラス」も見出しに登場させたい（サブタイトルでも。目次に出したい）
 
 さて、上記のように作ったサービスを呼び出そう、と思ったとします。
-まずサービスのハンドルは8.4.4で説明した手順で取れます。
-より簡単な取得の方法についてはプロキシを扱った後に触れます(8.6.9参照)。
+まずサービスのハンドルは@<hd>{driver_message|servicemanagerによるサービスハンドルの取得}で説明した手順で取れます。
+より簡単な取得の方法についてはプロキシを扱った後に触れます(@<hd>{IServiceManagerを用いてサービスのハンドルを簡単に取得する}参照)。
 
 === プロキシを使わないサービス呼び出しの例
 
 さて、このhandleに対してbinder_transaction_dataを用意し、binder_write_readに詰めてioctlをすれば、
-メソッド呼び出しが出来るのでした。(8.4.5など参照)
+メソッド呼び出しが出来るのでした。(@<hd>{driver_message|SVC_MGR_CHECK_SERVICEを例に、ioctl呼び出しを復習する}など参照)
 でもそれはとても長いコードになるので、毎回サービスを呼び出す都度やるのは大変です。
 例えばエラー処理などを省いても、以下のようなコードになってしまいます。
 
 //list[svccall_raw][プロキシ無しのサービス呼び出し]{
 int handle;
 
-// 8.4.4にあるようなコードでMyService1のハンドルを取得したとする。
+// @<hd>{driver_message|servicemanagerによるサービスハンドルの取得}にあるようなコードでMyService1のハンドルを取得したとする。
 // コードは省略。
 
 // 3+4を計算させる。
@@ -459,7 +459,7 @@ public:
 
 //list[proxy_usage][サービスプロキシを用いてサービスを呼び出す例]{
 int handle;
-// 今回もhandleは8.4.4のようなコードで習得済みとする。
+// 今回もhandleは@<hd>{driver_message|servicemanagerによるサービスハンドルの取得}のようなコードで習得済みとする。
 
 sp<BpMyService1> myservice = new BpMyService1(handle);
 
@@ -478,7 +478,7 @@ binder_transaction_dataとbinder_write_readを適切に初期化してioctlを�
 
 そこで以下では、このBpBinderについて見ていきましょう。
 
-== 8.6.6 サービスのプロキシとBpBinderの使い方
+== サービスのプロキシとBpBinderの使い方
 
 #@# TODO: 前項、を参照に置き換える
 前項のメソッドの呼び出しの長いコード「プロキシ無しのサービス呼び出し」を見ていくと、呼び出すメソッド特有な処理は以下の三つだけである事に気づきます。
@@ -522,7 +522,7 @@ MyService1サービスを使う人は、handleをコンストラクタで渡し�
 
 //list[myproxy_usage][MyService1Proxyを使うコード例]{
 int handle;
-// handleは8.4.4のコードで取り出してあるとする。
+// handleは@<hd>{driver_message|servicemanagerによるサービスハンドルの取得}のコードで取り出してあるとする。
 
 // プロキシクラスのコンストラクタにhandleを渡す
 MyService1Proxy myservice(handle);
@@ -536,7 +536,7 @@ int result = myservice.add(3, 4);
 
 
 
-== 8.6.7 BpBinderの実装 - transact()メソッドとIPCThreadState
+== BpBinderの実装 - transact()メソッドとIPCThreadState
 
 BpBinderはハンドルを渡して初期化し、transact()メソッドを呼んでメッセージを送信する、という話をしました。
 
@@ -566,13 +566,13 @@ IPCThreadStateのtransactはmOutに引数の処理を書いた後にjoinThreadPo
 こうしてサービスの実装者も使用者も、細かいプロセス間通信のコードを書く事無く、
 サービスの実装とプロキシの実装を提供出来るようになりました。
 
-== 8.6.8 servicemanagerのプロキシ - IServiceManager
+== servicemanagerのプロキシ - IServiceManager
 
 BpBinderとプロキシの説明を終えたので、servicemanagerのプロキシについて見ておく事にします。
 servicemanagerのプロキシは最初からAndroidのフレームワークの中に含まれています。
 
 servicemanagerはハンドル0番に固定されているので、プロキシとして最初からメソッド呼び出しが出来ます。
-具体的には8.4.4で行っているコードと同じ事をすれば良いのですが、これをプロキシ化したクラスに、BpServiceManagerというクラスがあります。
+具体的には@<hd>{driver_message|servicemanagerによるサービスハンドルの取得}で行っているコードと同じ事をすれば良いのですが、これをプロキシ化したクラスに、BpServiceManagerというクラスがあります。
 通常はその基底クラスであるIServiceManagerを使う事になっています。
 
 ハンドルを取得せずに使う事が出来るので、IServiceManagerのインスタンスはグローバル関数で簡単に取得出来るようになっています。
@@ -621,22 +621,22 @@ public:
 //}
 
 addService()とcheckService()の二つのメソッドです。
-これらは、8.4.4で挙げたservicemanagerの二つのメソッドID、つまりSVC_MGR_ADD_SERVICEとSVC_MGR_CHECK_SERVICEに対応したプロキシメソッドです。
+これらは、@<hd>{driver_message|servicemanagerによるサービスハンドルの取得}で挙げたservicemanagerの二つのメソッドID、つまりSVC_MGR_ADD_SERVICEとSVC_MGR_CHECK_SERVICEに対応したプロキシメソッドです。
 
 checkService()の結果は、ハンドルを返すのではなく、それをBpBinderにラップした物を返します。
 型はそのスーパークラスのIBinderを返す事になっています。
-何故BpBinderでなくIBinderなのか、については8.6.10で扱います。
+何故BpBinderでなくIBinderなのか、については@<hd>{IBinderとは何か？ - SVC_MGR_CHECK_SERVICEでハンドルが返ってこない場合}で扱います。
 
 なお、何回か自動でリトライするgetService()というラッパも存在します。こちらの方が便利なので通常はこちらを使いますが、本質的にはcheckServiceメソッドと同じ事を行います。
 
 
-== 8.6.9 IServiceManagerを用いてサービスのハンドルを簡単に取得する
+== IServiceManagerを用いてサービスのハンドルを簡単に取得する
 
-比較の為、8.4.4で述べたservicemanager呼び出しでサービスのハンドルを取得するのと同じコードを、
+比較の為、@<hd>{driver_message|servicemanagerによるサービスハンドルの取得}で述べたservicemanager呼び出しでサービスのハンドルを取得するのと同じコードを、
 IServiceManagerでも書いてみましょう。
 
 defaultServiceManager()でプロキシを取得し、checkService()かgetService()で取り出せば良い、という事になります。
-8.4.4と同様に"SurfaceFlinger"サービスを取得する場合のコードは以下のようになります。
+@<hd>{driver_message|servicemanagerによるサービスハンドルの取得}と同様に"SurfaceFlinger"サービスを取得する場合のコードは以下のようになります。
 
 //list[getsvcr][getService()の使用例]{
 sp<IBinder> binder = defaultServiceManager()->getService(String16("SurfaceFlinger"));
@@ -648,7 +648,7 @@ IBinderやBpBinderの詳細はここでは重要では無いので、すぐに�
 必要であれば上記2行で簡単にhandleも取得出来ます。
 
 
-== 8.6.10 IBinderとは何か？ - SVC_MGR_CHECK_SERVICEでハンドルが返ってこない場合
+== IBinderとは何か？ - SVC_MGR_CHECK_SERVICEでハンドルが返ってこない場合
 
 getService()メソッドの結果はBpBinderでは無くてIBinderといいう基底クラスだと言いました。
 いつもBpBinderであれば最初からBpBinderを返せば良いのですが、実はSVC_MGR_CHECK_SERVICEでは、ポインタが返ってくるケースがあります。
@@ -679,7 +679,7 @@ BINDER_TYPE_HANDLEを送信した先が、そのハンドルの元となるポ�
 この事をもう少し詳しく見ていきましょう。
 プロセスAにサービスのポインタが存在し、プロセスBとやり取りする場合を考えましょう。
 
-プロセスAから生のポインタをプロセスBに送る時は、flat_binder_objectにBINDER_TYPE_BINDERを入れるのでした。(8.5.3, 8.5.4)
+プロセスAから生のポインタをプロセスBに送る時は、flat_binder_objectにBINDER_TYPE_BINDERを入れるのでした。(@<hd>{flat_binderobj|オブジェクトの送信とflat_binder_object その1 - ユーザープロセス側}, @<hd>{flat_binderobj|オブジェクトの送信とflat_binder_object その2 - binderドライバと受信側})
 すると、プロセスBの側ではBINDER_TYPE_HANDLEとして渡ってきます。
 
 //image[6_10_1][BINDER_TYPE_BINDERを送るとBINDER_TYPE_HANDLEとして出てくる]
@@ -780,7 +780,7 @@ switch(obj->type) {
 上記コードでobj->ptrとobj->cookieが出てきますが、概念的には同じインスタンスが入っています。
 実際にはobj->ptrにはWeak Referenceが、obj->cookieには実体のポインタが入っています。
 
-== 8.6.11 ProcessStateとスレッドプール
+== ProcessStateとスレッドプール
 
 ここまででIPCThreadStateのjoinThreadPool()メソッドがioctlを呼び出すループの処理を行っている、という話をしてきました。
 ですがこのクラスのどこらへんがスレッドプールなのか、という話はしていません。
@@ -817,7 +817,7 @@ protected:
 
 こうして、ProcessStateのstartThreadPool()メソッドを呼び出すと、新しいスレッドが作られて、
 そのスレッドの中ではIPCThreadStateのjoinThreadPool()メソッドが呼ばれます。
-このjoinThreadPool()はioctlを呼び出して処理するループでした。(8.6.4)
+このjoinThreadPool()はioctlを呼び出して処理するループでした。(@<hd>{IPCThreadStateのioctl()呼び出しループ - joinThreadPool()メソッドとBBinder})
 
 ProcessStateのstartThreadPool()を何回か呼ぶと、呼んだ回数分だけスレッドが作られて、皆がioctlで待ち状態に入ります。
 そしてbinderドライバからメッセージがやってきたら処理を行って、またioctlで待ち状態に入る訳です。
@@ -827,12 +827,12 @@ ProcessStateのstartThreadPool()を何回か呼ぶと、呼んだ回数分だけ
 そのループをスレッドプールとして管理するのがProcessStateです。
 
 
-== 8.6.12 システムサービスのmain関数とProcessState - 独自のシステムサービスを提供する時のコード例
+== システムサービスのmain関数とProcessState - 独自のシステムサービスを提供する時のコード例
 
 ProcessStateにはスレッドプールの管理の他に、もう一つ役割があります。
 それはbinderドライバのopenとmmapです。
 
-サービスを提供するプロセスは、まずbinderドライバをopenしてmmapしなくてはいけないのでした。(8.3)
+サービスを提供するプロセスは、まずbinderドライバをopenしてmmapしなくてはいけないのでした。(@<chapref>{systemcall})
 これらopenとmmapの処理は、ProessStateのコンストラクタで行います。
 #@# TODO: 図解
 
@@ -888,7 +888,7 @@ void main() {
 そのポインタをバインダドライバ経由でservicemanagerにSVC_MGR_ADD_SERVICEメソッドIDで送る事で、
 このサービスをservicemanagerに登録する事でした。
 
-ここでは8.6.8で出てきたIServiceManagerを使っています。
+ここでは@<hd>{servicemanagerのプロキシ - IServiceManager}で出てきたIServiceManagerを使っています。
 この過程でMyServiceポインタに対応したbinder_nodeが作られ、別のプロセスからはこのbinder_nodeを参照する事でポインタを識別できます。
 
 (4) サービスのポインタをservicemanagerに登録したので、このメインスレッドもやる事は無くなりました。
@@ -905,7 +905,7 @@ main関数はたったの3行となります。
 
 
 
-== 8.6.13 サービスの仕組みとシステムの発展 - サービスの実装とプロセスの分離
+== サービスの仕組みとシステムの発展 - サービスの実装とプロセスの分離
 
 ここまでで、Binderという仕組みのうち、スレッドプールのレイヤの解説が終わりました。
 先に進む前に、この時点で実現されているサービス、という物について、どういう特徴があるかを少し考えてみたいと思います。
@@ -919,7 +919,7 @@ Androidではハードウェアや新たなシステムの機能を追加する�
 システムサービスの実装はBBinderのサブクラスとしてonTransactを実装し、
 さらにそれに対応したプロキシをBpBinderを用いて実装するだけです。
 このコードにはmain関数で作った何かを参照する必要は一切ありません。
-main関数でこのサービスへの依存が発生するのは、addService()の引数だけです。(8.6.12の(3)に対応)。
+main関数でこのサービスへの依存が発生するのは、addService()の引数だけです。(@<hd>{システムサービスのmain関数とProcessState - 独自のシステムサービスを提供する時のコード例}の(3)に対応)。
 
 システムサービスがそれぞれ別のプロセスに分かれている方がロバストで安全なシステムにしやすいですが、
 一方でプロセスはメモリやCPUなどのハードウェア資源を消費する物でもあり、

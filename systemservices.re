@@ -1,4 +1,4 @@
-= 8.9 様々なプロセスやシステムサービスのBinder関連の初期化を理解する
+= 様々なプロセスやシステムサービスのBinder関連の初期化を理解する
 
 //lead{
 前節までで、システムサービスの実装の仕方は全て説明しました。
@@ -21,7 +21,7 @@ JavaのプロセスでProcessStateやIPCThreadState関連のメソッドをど�
 
 //}
 
-== 8.9.1 SystemServerとそれ以外のサービス - Zygoteから起動されるサービスとinit.rcから起動されるサービス
+== SystemServerとそれ以外のサービス - Zygoteから起動されるサービスとinit.rcから起動されるサービス
 
 TODO: 参照更新(0章は一巻か二巻に編入されたはず）。この章は本編への参照が多いので、いちいちTODOは足さずにまとめて直す。
 
@@ -101,7 +101,7 @@ Binderを用いたシステムサービスの仕組みは、stagefrightバグに
 
 将来もコアの数などが増えるに従い、もっと多くのシステムサービスが、だんだんと別のプロセスに分かれていく事でしょう。
 
-== 8.9.2 surfaceflingerのmainを見る - SystemServer以外のシステムサービスのmain関数
+== surfaceflingerのmainを見る - SystemServer以外のシステムサービスのmain関数
 
 まずはSystemServer以外のサービスの、立ち上がる所から見てみましょう。
 一番簡単で本書での出番も多いsurfaceflingerが説明にも都合が良いので、surfaceflingerのmain関数を見てみます。
@@ -139,7 +139,7 @@ int main(int, char**) {
 //}
 
 いろいろとしてますね。この章に関連する所だけ順番に見ていきましょう。
-全体的に、8.6.12で説明したのと同じ構造となっているので、そちらの説明も参考にしてください。
+全体的に、@<hd>{threadpool|システムサービスのmain関数とProcessState - 独自のシステムサービスを提供する時のコード例}で説明したのと同じ構造となっているので、そちらの説明も参考にしてください。
 
 まずはProcessStateのself()を呼んでますね。
 
@@ -148,14 +148,14 @@ int main(int, char**) {
 //}
 
 このProcessState::self()の呼び出しでBinderドライバがopenされてmmapされるのでした。
-次にスレッドプールを開始しています。(8.6.11参照)
+次にスレッドプールを開始しています。(@<hd>{threadpool|ProcessStateとスレッドプール}参照)
 
 //list[prcstatthpool][スレッドプールの開始]{
     ps->startThreadPool();
 //}
 
 この呼び出しでは、新しいスレッドが作られて、そこでIPCThreadState::self()のjoinThreadPool()が呼ばれているのでした。
-このjoinThreadPool()の中はioctlを呼んでそれを処理するメッセージループとなっています。(8.6.4参照)
+このjoinThreadPool()の中はioctlを呼んでそれを処理するメッセージループとなっています。(@<hd>{threadpool|IPCThreadStateのioctl()呼び出しループ - joinThreadPool()メソッドとBBinder}参照)
 
 次にSurfaceFlingerのインスタンスをnewして初期化しています。
 
@@ -174,7 +174,7 @@ class SurfaceFlinger : public BnSurfaceComposer,
 
 いろいろな物を継承していますが、BnSurfaceComposerは名前からBnInterfaceを継承したクラスと予想出来ます。
 つまりこのtransactがIPCThreadStateのjoinThreadPoolから呼ばれて、
-その中から呼ばれるonTransactをオーバーライドして実装しているのでしょう。(8.7.7参照)
+その中から呼ばれるonTransactをオーバーライドして実装しているのでしょう。(@<hd>{common_intr|サービスの実装とプロキシの実装 - BnInterfaceとBpInterface}参照)
 
 一応BnSurfaceComposerの宣言を見てみます。
 
@@ -196,7 +196,7 @@ servicemanagerに登録するコードです。
     sm->addService(String16(SurfaceFlinger::getServiceName()), flinger, false);
 //}
 
-これも8.6.10とほとんど同様で、唯一の違いは最後にfalseを渡している事です。
+これも@<hd>{threadpool|IBinderとは何か？ - SVC_MGR_CHECK_SERVICEでハンドルが返ってこない場合}とほとんど同様で、唯一の違いは最後にfalseを渡している事です。
 このフラグはallowIsolatedという変数名で、これは制限の強いサンドボックスからのアクセスは弾く、というフラグです。
 
 こうしてIServiceManagerに登録すれば、このスレッドの役割は終わりなので、
@@ -216,9 +216,9 @@ Looperを使ったループを持っていて、別のスレッドからメッ�
 #@# TODO: 図解、Looperへの参照
 
 以上でsurfaceflingerサービスのmain関数を見ました。
-大筋は8.6.12で解説したのと同じ処理をしている事が分かります。
+大筋は@<hd>{threadpool|システムサービスのmain関数とProcessState - 独自のシステムサービスを提供する時のコード例}で解説したのと同じ処理をしている事が分かります。
 
-== 8.9.3 Javaのプロセスの開始とProcessState - AppRuntime::onZygoteInit()
+== Javaのプロセスの開始とProcessState - AppRuntime::onZygoteInit()
 
 Javaのプロセスの開始の詳細については9.6のZygoteの所で詳細に扱いますが、
 ここではBinder関連の初期化の部分だけ見ておきましょう。
@@ -257,7 +257,7 @@ startThreadPool()でioctl呼び出しと、その結果が戻ってきたらBBin
 9.6と合わせてここを理解しておくと、OSのスレッドのレベルでサービス呼び出しが理解出来るようになります。
 #@# TODO: 図解
 
-== 8.9.4 ActivityManagerServiceはどうやってActivityThreadのメソッドを呼び出すのか？ - ApplicationThreadにみるシステムサービスでないクラスの呼び出し
+== ActivityManagerServiceはどうやってActivityThreadのメソッドを呼び出すのか？ - ApplicationThreadにみるシステムサービスでないクラスの呼び出し
 
 ZygoteのプロセスでProcessState::self()->startThreadPool()呼び出しが行われている、という話を見たので、
 これまで保留にしてきた、ApplicationThread呼び出しの所を最後に見てみます。
@@ -279,7 +279,7 @@ ZygoteのプロセスでProcessState::self()->startThreadPool()呼び出しが�
 このApplicationThreadは、間にいろいろ挟まりますが基本的にはJavaのBinderクラスを継承しています。
 復習しておくと、JavaのBinderクラスはネイティブのBBinderに対応しているクラスでした。
 
-ActivityManagerService自身は8.9.1で確認した通り、SystemServerにホストされているサービスです。
+ActivityManagerService自身は@<hd>{SystemServerとそれ以外のサービス - Zygoteから起動されるサービスとinit.rcから起動されるサービス}で確認した通り、SystemServerにホストされているサービスです。
 ですから、通常のサービス呼び出しとして別のプロセスからメソッドを呼び出す事が出来ます。
 そこでActivityThreadは、attach()の呼び出しの所で、このApplicationThreadインスタンスを引数にActivityManagerServiceのattachApplication()というメソッドを呼んでいます。
 
@@ -303,7 +303,7 @@ ActivityManagerServiceはサービスの実装クラスであり、ActivityThrea
 
 //image[9_4_2][ApplicationThreadをflat_binder_objectに詰めて送信する]
 
-すると8.5.4で扱ったflat_binder_objectの変換のメカニズムで、ActivityThreadのあるプロセスにはbinder_nodeというツリーのノードがドライバ内に生成されて、
+すると@<hd>{flat_binderobj|オブジェクトの送信とflat_binder_object その2 - binderドライバと受信側}で扱ったflat_binder_objectの変換のメカニズムで、ActivityThreadのあるプロセスにはbinder_nodeというツリーのノードがドライバ内に生成されて、
 ActivityManagerServiceのあるスレッド側にはこのbinder_nodeを参照するbinder_refのツリーにノードが追加され、
 このインデックスがハンドルとしてActivityManagerServiceのattachApplicationの引数には入る訳です。
 このハンドルをActivityRecordの持つプロセス構造体に紐づけるのです。
@@ -322,7 +322,7 @@ ActivityManagerServiceのあるスレッド側にはこのbinder_nodeを参照�
  1. ActivityThread側も、binderドライバをopenしてmmapしてある
  2. ActivityThread側も、ioctl呼び出しでブロックして待っている
 
-8.5.4で解説した通り、binder_nodeはbinderドライバのプロセス構造体が保持しています。
+@<hd>{flat_binderobj|オブジェクトの送信とflat_binder_object その2 - binderドライバと受信側}で解説した通り、binder_nodeはbinderドライバのプロセス構造体が保持しています。
 このプロセス構造体は、binderドライバファイルをopenした時のファイルディスクリプタに対応して作られる物でした。
 つまり、binder_nodeが生成される為には、ActivityThreadのプロセス、今まさにZygoteからforkして、アプリのapkからクラスをロードするそのプロセスも、
 binderドライバをどこかでopenしてmmapしてある必要があります。これが(1)に相当します。
@@ -341,7 +341,7 @@ binderドライバをどこかでopenしてmmapしてある必要があります
 IPCThreadStateのjoinThreadPoolを、Zygoteでforkした後、誰かがどこかで呼び出していないといけません。
 これが(2)に相当します。
 
-この(1)と(2)を行っているのが、前項の8.9.3で扱ったAppRuntimeのonZygoteInit()メソッドだった、という訳です。
+この(1)と(2)を行っているのが、前項の@<hd>{Javaのプロセスの開始とProcessState - AppRuntime::onZygoteInit()}で扱ったAppRuntimeのonZygoteInit()メソッドだった、という訳です。
 
 AppRuntimeのonZygoteInit()メソッド呼び出しは、Zygoteのループで、ソケットからのコマンドを待って子プロセスをforkしている所で行っています。
 詳細は9.6.4で扱いますが、ここでは新しく生成されたプロセスの初期化の所で前項で説明したAppRuntime.onZygoteInit()が呼ばれる、という事が重要です。
