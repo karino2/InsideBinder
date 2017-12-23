@@ -1,4 +1,4 @@
-= {driver_message} 8.4 binderドライバによるメッセージの送受信 - servicemanagerとサービス
+={driver_message} binderドライバによるメッセージの送受信 - servicemanagerとサービス
 
 //lead{
 
@@ -13,7 +13,7 @@
 その過程で重要で特別なサービスである、servicemanagerについても扱います。
 //}
 
-== 8.4.1 ドライバに書きこむデータの入れ子構造
+== ドライバに書きこむデータの入れ子構造
 
 ドライバに書きこむデータはbinder_write_read構造体のデータだ、と言いました。
 この構造体の中にさらにBC_TRANSACTIONの時にはbinder_transaction_data型のデータが入り、
@@ -33,9 +33,9 @@ binder_write_read、binder_transaction_data、flat_binder_objectは、以下の�
 以下の節でそれぞれの関係が良く分からなくなってきた時には、この図に戻ってきてみてください。
 
 
-== 8.4.2 ドライバに書き込むデータのフォーマットとコマンドID
+== ドライバに書き込むデータのフォーマットとコマンドID
 
-ioctlを使って読み書きするデータはbinder_write_read構造体だと言いました。(8.3.4)
+ioctlを使って読み書きするデータはbinder_write_read構造体だと言いました。(@<hd>{systemcall|binderドライバのioctlと読み書き})
 例えば以下のようなコードで初期化していました。
 
 //list[bwrwriteinit][binder_write_readのwrite側初期化、再掲]{
@@ -83,7 +83,7 @@ Binderの特徴の一つとして、最初からC++やオブジェクト指向�
 
 それでは以下、BC_TRANSACTIONについて詳しく見ていきましょう。
 
-== 8.4.3. BC_TRANSACTIONコマンドとbinder_transaction_data
+== BC_TRANSACTIONコマンドとbinder_transaction_data
 
 BINDER_WRITE_READでioctlを呼び出す時に書き込むデータのうち、先頭がBC_TRANSACTIONコマンドIDの場合、
 #@# TODO: 「BINDER_WRITE_READで」がどこにかかっているか、少し難しいので直す
@@ -116,7 +116,7 @@ codeはメソッドを表すIDで、各サービスが勝手に決めます。
 さて、あと@<table>{btr_field}「binder_transaction_dataのフィールド」の中で残っているのはtarget.handleだけです。
 このtarget.handleさえ分かればメソッドを呼び出す事が出来ます。そこで登場するのがservicemanagerです。
 
-== 8.4.4 servicemanagerによるサービスハンドルの取得
+== servicemanagerによるサービスハンドルの取得
 
 #@# TODO: 「サービスハンドルの取得の呼び出し」について、何を呼び出すかあらわにタイトル化出来ないか検討。あと、サブタイトルも欲しい
 
@@ -150,7 +150,7 @@ SVC_MGR_CHECK_SERVICEの引数としては、
 
 例えばSurfaceFlingerサービスのハンドルを検索したい場合のbinder_transaction_dataの作り方は以下のようになります。
 (重要な所だけ抜き出しています）
-簡単のためParcelというシリアライザを使いますが、特に説明しなくともコードから何をやってるかは想像出来るでしょう（詳細は8.6.2でも扱います）。
+簡単のためParcelというシリアライザを使いますが、特に説明しなくともコードから何をやってるかは想像出来るでしょう（詳細は@<hd>{threadpool|Parcelとシリアライズ}でも扱います）。
 
 //list[btr_build][Parcelを用いたbinder_transacton_dataの作り方]{
 // binder_transaction_dataのうち引数の所のデータを作る。
@@ -188,11 +188,11 @@ tr.data.ptr.buffer = writeData.data();
 #@# TODO: 「servicemanagerが全サービスの一覧を持っていて」について、本書内で参照先あったら追加
 #@# TODO: このあたりで、図解
 
-== 8.4.5 SVC_MGR_CHECK_SERVICEを例に、ioctl呼び出しを復習する
+== SVC_MGR_CHECK_SERVICEを例に、ioctl呼び出しを復習する
 
 以上で一通りservicemanagerのメソッド呼び出しの解説を終えたのですが、
 復習も兼ねてこのbinder_transaction_dataを実際に送信するまでのコードも見てみましょう。
-内容としては8.3.4と同じ内容となります。以下、重要なコードだけを抜粋していきます。
+内容としては@<hd>{systemcall|binderドライバのioctlと読み書き}と同じ内容となります。以下、重要なコードだけを抜粋していきます。
 
 まずはbinder_transaction_dataはBC_TRANSACTIONコマンドで送信するのでした。
 BC_TRANSACTIONコマンドの送受信にはbinder_write_read構造体を使い、
@@ -253,7 +253,7 @@ servicemanagerのスレッドを起こしてこのbinder_tarnsaction_dataを渡�
 では次にこの結果がどういう物か、典型的な処理を見る事で見ていきましょう。
 
 
-== 8.4.6 サービスハンドルの取得の結果 - メッセージ受信
+== サービスハンドルの取得の結果 - メッセージ受信
 
 ioctlを用いたメソッド呼び出しの結果は、binder_write_read構造体のread_bufferに書かれます。
 書かれたデータの長さはbwr.read_consumedに入ります。
@@ -274,7 +274,7 @@ BC_TRANSACTIONの結果が正常に返る場合のコマンドは、BR_REPLYと�
 
 //image[4_6_1][読み出したバッファの構造]
 
-8.4.5のコードの続きとしては以下のようなコードでこのハンドルが取れます。
+@<hd>{SVC_MGR_CHECK_SERVICEを例に、ioctl呼び出しを復習する}のコードの続きとしては以下のようなコードでこのハンドルが取れます。
 
 //list[extract_readbuf][読みだしたバッファからbinder_transaction_dataを取り出す]{
 // /* 1 */ 先頭4バイトはコマンドID
@@ -305,7 +305,7 @@ int handle = obj->handle;
 
 という手順になります。なお、/* 3 */でflat_binder_objectという物が登場しましたが、これについては次節で詳細に扱います。
 
-こうして目的のサービスのハンドルを取得したら、以後はこのようにして得たハンドルに対して8.4.4で説明したのと同様なコードで、
+こうして目的のサービスのハンドルを取得したら、以後はこのようにして得たハンドルに対して@<hd>{servicemanagerによるサービスハンドルの取得}で説明したのと同様なコードで、
 指定したサービスのメソッドが呼び出せます。
 
 ここで解説したコードはサービスのハンドルの取得時の受信した後のコードですが、

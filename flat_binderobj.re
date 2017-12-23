@@ -1,4 +1,4 @@
-= {flat_binderobj} 8.5 binderドライバの内側とオブジェクトの送信 - flat_binder_object
+={flat_binderobj}  binderドライバの内側とオブジェクトの送信 - flat_binder_object
 
 //lead{
 
@@ -16,7 +16,7 @@ binderドライバを利用して引数が文字列のみの簡単なメソッ�
 binderドライバ内部のデータ管理は、カーネルのメモリ空間で行われるカーネルモードでの話となります。
 //}
 
-== 8.5.1 オブジェクトを送信すると何が起こるか？
+== オブジェクトを送信すると何が起こるか？
 
 詳細に入る前に、オブジェクトを送信すると何が起こるのか？という事の概要から始めたいと思います。
 
@@ -51,7 +51,7 @@ Bにはオブジェクトを転送される訳では無くハンドルが渡さ�
 
 
 
-== 8.5.2 スレッドとプロセスのデータ構造 - binder_procとbinder_thread
+== スレッドとプロセスのデータ構造 - binder_procとbinder_thread
 
 binderドライバは、binderドライバを使用するプロセスに関しての情報を、binder_procというデータ構造で管理しています。
 これはドライバをopenした時にカーネルによって作られるfile構造体のフィールドに格納されます。
@@ -109,7 +109,7 @@ Linuxカーネルでは、プロセス構造体と言う物があります。こ
 ===[/column]
 
 
-== 8.5.3 オブジェクトの送信とflat_binder_object その1 - ユーザープロセス側
+== オブジェクトの送信とflat_binder_object その1 - ユーザープロセス側
 
 メソッド呼び出しの引数としてオブジェクトを渡す場合の話に入ります。
 
@@ -120,7 +120,7 @@ Linuxカーネルでは、プロセス構造体と言う物があります。こ
 
 binderドライバに生のポインタを渡す場合は、flat_binder_object構造体に入れて渡します。
 
-サービスの取得の所、つまり受け取る側でも、結果はflat_binder_object構造体として返ってくる、という事を説明しました。(8.4.6)
+サービスの取得の所、つまり受け取る側でも、結果はflat_binder_object構造体として返ってくる、という事を説明しました。(@<hd>{driver_message|サービスハンドルの取得の結果 - メッセージ受信})
 送る側もこのflat_binder_objectという構造体を使います。
 
 flat_binder_objectには型を表すフィールドがあり、そこには大きく三つの値が入ります。
@@ -150,7 +150,7 @@ obj.binder = ptr;
 //image[5_3_1][flat_binder_objectで送れる物三つ]
 
 基本的にはこのflat_binder_objectを引数を表すバッファに入れて少し補助的な設定をした上でioctlを呼べば良い、という事になります。
-引数というのはbinder_transaction_dataのptr.bufferに入れる、という話を8.4.3で行いましたが、
+引数というのはbinder_transaction_dataのptr.bufferに入れる、という話を@<hd>{driver_message|BC_TRANSACTIONコマンドとbinder_transaction_data}で行いましたが、
 いろいろな場所に説明が飛ぶと読む方も大変だと思うので、
 一部繰り返しになりますがもう一度ここで全体像を見てみましょう。
 
@@ -158,7 +158,7 @@ obj.binder = ptr;
 MyServiceというクラスをサービスとして登録する場合を見ていきます。サービス名は"com.example.MyService"とします。
 
 servicemanagerはハンドルが0という固定値でした。
-この0というハンドルにBC_TRANSACTIONでSVC_MGR_ADD_SERVICEというメソッドを呼び出すことで、サービスの登録を行えます。(8.4.4)
+この0というハンドルにBC_TRANSACTIONでSVC_MGR_ADD_SERVICEというメソッドを呼び出すことで、サービスの登録を行えます。(servicemanagerによるサービスハンドルの取得)
 
 SVC_MGR_ADD_SERVICEは、引数として以下の三つを受け取ります
 
@@ -209,7 +209,7 @@ memcpy(&writedata[used], &obj, sizeof(flat_binder_object));
 used += sizeof(flat_binder_object);
 //}
 
-こうして出来たwritedataを8.4.4と同様にbinder_transaction_dataに入れて、それを8.4.5と同様にbinder_write_readに入れれば良い訳ですが、
+こうして出来たwritedataを@<hd>{driver_message|servicemanagerによるサービスハンドルの取得}と同様にbinder_transaction_dataに入れて、それを@<hd>{driver_message|SVC_MGR_CHECK_SERVICEを例に、ioctl呼び出しを復習する}と同様にbinder_write_readに入れれば良い訳ですが、
 flat_binder_objectを渡す時は先ほども述べた通り、さらにオフセットの指定という事もやらなくてはいけません。
 
 //image[5_3_2][flat_binder_objectとオフセットの書き方]
@@ -288,14 +288,14 @@ res = ioctl(fd, BINDER_WRITE_READ, &bwr);
 
 
 #@# 旧8.3.3
-== 8.5.4 オブジェクトの送信とflat_binder_object その2 - binderドライバと受信側
+== オブジェクトの送信とflat_binder_object その2 - binderドライバと受信側
 
 ioctl呼び出しの時にflat_binder_objectを渡すと、ドライバは内部でflat_binder_objectの中身の種類に合わせて適切に変換し、送り先に送ります。
 
 BINDER_TYPE_BINDERのポインタは呼び出し元のメモリ空間でしか有効で無いので、
 このポインタを渡されても別のプロセスは困ってしまいます。
 
-8.5.2で解説したように、binderドライバをopenした時のファイルディスクリプタには、
+@<hd>{スレッドとプロセスのデータ構造 - binder_procとbinder_thread}で解説したように、binderドライバをopenした時のファイルディスクリプタには、
 そのプロセスの構造体が格納されています。
 
 そしてこのプロセス構造体には、そのプロセスが保持するBINDER_TYPE_BINDERのポインタを格納するツリーがあります。
@@ -382,7 +382,7 @@ binder_refのノードを表すハンドルがioctlからは返る事になり�
 これでbinderドライバの主要なところは一通り解説した事になりますが、おまけとしてファイルディスクリプタの送信の話もしましょう。
 
 
-== 8.5.5 ファイルディスクリプタの送信とflat_binder_object - BINDER_TYPE_FDの場合
+== ファイルディスクリプタの送信とflat_binder_object - BINDER_TYPE_FDの場合
 
 binderの特徴でファイルディスクリプタを別のプロセスに送れる、という物があります。
 ここまで解説してしまうと大した話でも無いのですが、有名な話でもあるのでここでメカニズムを確認しておきます。

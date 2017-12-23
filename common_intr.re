@@ -1,4 +1,4 @@
-= 8.7 共通ネイティブインターフェースのレイヤ - IInterfaceとinterface_cast
+= 共通ネイティブインターフェースのレイヤ - IInterfaceとinterface_cast
 #@# 旧8.5
 
 //lead{
@@ -34,9 +34,9 @@ Javaのサービスは言語境界をまたぐ都合で、本節の共通ネイ�
 //}
 
 
-== 8.7.1 呼び出しコードが共通である意義 - 共通のインターフェースの必要性
+== 呼び出しコードが共通である意義 - 共通のインターフェースの必要性
 
-8.6.13でも触れた通り、サービスという仕組みは、
+@<hd>{threadpool|サービスの仕組みとシステムの発展 - サービスの実装とプロセスの分離}でも触れた通り、サービスという仕組みは、
 時代と共にホストしているプロセスを分離していく、という事が想定されています。
 
 その為には、呼び出し元のコードが呼び出し先のサービスが別のプロセスに居るか同じプロセスに居るかで、
@@ -82,19 +82,19 @@ Javaのサービスは言語境界をまたぐ都合で、本節の共通ネイ�
 
 #@# TODO: 8.6.10と重複してる部分を整理統合
 #@# 旧8.5.2
-== 8.7.2 プロセスが同じか別かで変わる所 - IBinderの役割
+== プロセスが同じか別かで変わる所 - IBinderの役割
 
 サービスを呼び出す側のコードが、サービスが同じプロセスが別のプロセスかに関わらず同じになるようにしたい。
 その為には何が必要か、という事を考える為に、呼び出すサービスのプロセスが同じか別かで何が変わるか、という所を見ていきたいと思います。
 
-8.6.10でも触れた通り、binderドライバからサービスを受け取る時に、サービスが同じプロセスだとBINDER_TYPE_BINDERとして生のポインタが、
+@<hd>{threadpool|IBinderとは何か？ - SVC_MGR_CHECK_SERVICEでハンドルが返ってこない場合}でも触れた通り、binderドライバからサービスを受け取る時に、サービスが同じプロセスだとBINDER_TYPE_BINDERとして生のポインタが、
 そして別のプロセスだとBINDER_TYPE_HANDLEとしてハンドルが返ってくるのでした。
 
 ポインタの時にはただのオブジェクトなのだから、キャストして普通に使えば良い訳です。
-ハンドルの時にはプロキシオブジェクトを生成して、これを呼ぶのでした。(8.6.6)
+ハンドルの時にはプロキシオブジェクトを生成して、これを呼ぶのでした。(@<hd>{threadpool|サービスのプロキシとBpBinderの使い方})
 
 具体例を見ましょう。
-まずサービスの実装として8.6.4のMyService1を用いて説明します。
+まずサービスの実装として@<hd>{threadpool|IPCThreadStateのioctl()呼び出しループ - joinThreadPool()メソッドとBBinder}のMyService1を用いて説明します。
 サービスの取得は、IServiceManagerのgetService()を使えば良いのでした。
 
 
@@ -105,7 +105,7 @@ sp<IBinder> service = defaultServiceManager()->getService(String16("com.example.
 このserviceがBBinder由来の物かBpBinder由来の物か、つまりBINDER_TYPE_BINDERかBINDER_TYPE_HANDLEかで処理を分けます。
 
 説明の都合で、先にプロキシから見ていきます。
-MyService1のプロキシは8.6.6にありました。（都合によりコンストラクタの引数を変更してます）。
+MyService1のプロキシは@<hd>{threadpool|サービスのプロキシとBpBinderの使い方}にありました。（都合によりコンストラクタの引数を変更してます）。
 
 //list[proxycase][MyService1Proxyの実装、再掲]{
 class MyService1Proxy {
@@ -127,7 +127,7 @@ public:
 //}
 
 serviceがBpBinderならこちらを使えば良い、という事になります。
-IBinderにはlocalBinderとremoteBinderというメソッドがあって、このIBinderの実体がBBinderかBpBinderのどちらかが問い合わせ出来ます。(8.6.10)
+IBinderにはlocalBinderとremoteBinderというメソッドがあって、このIBinderの実体がBBinderかBpBinderのどちらかが問い合わせ出来ます。(@<hd>{threadpool|IBinderとは何か？ - SVC_MGR_CHECK_SERVICEでハンドルが返ってこない場合})
 
 //list[ibinder][IBinderのlocalBinder()とremoteBinder()]{
 class IBinder {
@@ -168,7 +168,7 @@ if (bp != NULL) {
 さて、オブジェクトは無事得られました。
 このオブジェクトをどう呼んだら良いのでしょうか？
 
-そこでMyService1のクラスを見ると、8.6.4に実装がありました。以下のコードです。
+そこでMyService1のクラスを見ると、@<hd>{threadpool|BBinderのtransact()とonTransact()}に実装がありました。以下のコードです。
 
 //list[myserviceimp][MyService1の実装、再掲]{
 class MyService1 : public BBinder {
@@ -226,7 +226,7 @@ result = reply.readInt32();
 何より、これではプロキシ側と呼び出しコードがあまりにも違っていて共通化出来ません。
 
 
-== 8.7.3 サービスをローカルからも使えるようにする
+== サービスをローカルからも使えるようにする
 
 そこで普通に考えれば、addのロジックをリファクタリングして別メソッドにし、
 ローカル呼び出しの場合はこちらを呼び出すようにするのが普通です。
@@ -313,7 +313,7 @@ if (bp != NULL) {
 この手の強制の仕方はC++の得意分野ですね。テンプレート引数を使ってこの形で書かないとコンパイル出来ないように設計する訳です。
 それが共通ネイティブインターフェースのレイヤの仕事で、具体的にはIInterface、BnInterface、BpInterfaceの三つのクラスがやる事です。
 
-== 8.7.4 IInterface関連の三つのクラス - IInterface, BpInterface, BnInterface
+== IInterface関連の三つのクラス - IInterface, BpInterface, BnInterface
 #@# 旧 8.5.3
 
 ここからは呼び出し側のコードをローカルかリモートかによらずに同一にする為のレイヤである、
@@ -346,7 +346,7 @@ IInterface、BnInterface、BpInterfaceは、C++のテンプレートを用いる
 
 これを実装する所でどのようにIInterface関連クラスが共通インターフェースを強制するのかを見ていきます。
 
-== 8.7.5 テンプレートによる継承の強制
+== テンプレートによる継承の強制
 
 BnInterfaceもBpInterfaceもテンプレート引数を取ります。
 このテンプレート引数はインターフェースのクラスにする約束となっています。
@@ -408,7 +408,7 @@ class BpMyService1: public BpInterface<IMyService1> {
 
 これはドキュメントなどに書いて紳士協定としておくよりも、ずっと良い強制方法です。
 
-このようなスタイルで実装をしていくと、自然と8.7.3のようなスタイルでコードを書く事になります。
+このようなスタイルで実装をしていくと、自然と@<hd>{サービスをローカルからも使えるようにする}のようなスタイルでコードを書く事になります。
 あとは、プロキシを生成するかキャストするかを関数で隠して、以後はIMyService1だけ使えば良くなります。
 
 //list[imysvcrconv][IMyService1へ変換する関数例]{
@@ -427,7 +427,7 @@ sp<IMyService1> asMyService1Interface(IBinder service) {
 
 そこでIMyService1インターフェースクラスについて見ていきましょう
 
-== 8.7.6 IInterfaceとasInterfaceメソッド - IMyService1クラス
+== IInterfaceとasInterfaceメソッド - IMyService1クラス
 
 インターフェースのクラスであるIMyService1の実装を見てみます。
 
@@ -522,7 +522,7 @@ asInterfaceはちょっとややこしいコードですが、要約すると以
  2. IBinderがBpBinderだったらBpMyService1でラップして返す
 
 インターフェースディスクリプタというのはioctlで送るコマンドの先頭に書く決まりになっていて、どのサービス実装者も書いている物です。
-実際8.4.4でもハードコードした文字列、として書いていました。
+実際@<hd>{driver_message|servicemanagerによるサービスハンドルの取得}でもハードコードした文字列、として書いていました。
 servicemanagerはこの文字列をチェックして、無かったらエラーとする為です。
 
 ですが、Androidでこれを有効に使っている例を私は見つけられませんでした。
@@ -556,7 +556,7 @@ Binder周辺の歴史のどこかでスクリプト言語を使っていた環�
 
 NULLだった場合はBpBinderです。つまりハンドルが中に入っているだけで、サービスのクラスのポインタでは無く、ただのint値です。
 そこでプロキシクラスであるBpMyService1を作ってIMyService1にキャストして返します。
-こうする事で、ByMyService1で8.6.6のような事をするように実装すれば、サービス呼び出しのコードが実現出来ます。
+こうする事で、ByMyService1で@<hd>{threadpool|サービスのプロキシとBpBinderの使い方}のような事をするように実装すれば、サービス呼び出しのコードが実現出来ます。
 
 このメソッドのポイントとしては、どちらにせよIMyService1*が返るので、
 利用者はこのIBinderがBpBinderなのかBBinderなのかを気にせずに、同じコードでサービスを呼べます。
@@ -579,7 +579,7 @@ inline sp<INTERFACE> interface_cast(const sp<IBinder>& obj)
 このように、IMyService1という物を定義して、決まり通りマクロを置くと、asInterface()メソッドが使えるようになります。
 
 
-== 8.7.7 サービスの実装とプロキシの実装 - BnInterfaceとBpInterface
+== サービスの実装とプロキシの実装 - BnInterfaceとBpInterface
 
 基本的にはasInterface()メソッドの説明で、この共通ネイティブインターフェースのレイヤの説明は終わりなのですが、
 ここは実際にサービスを実装する人が見るクラスでもあるので、簡単に他のクラスの実装も追って全体像を提示しておきましょう。
@@ -587,7 +587,7 @@ inline sp<INTERFACE> interface_cast(const sp<IBinder>& obj)
 サービスの実装はBnInterfaceのサブクラスとして行います。
 プロキシの実装はBpInterfaceのサブクラスとして行います。
 実装内容はBBinderとBpBinderの時とほとんど変わりません。
-つまり、ほとんど8.6.4と8.6.6の二つの節の内容の繰り返しとなります。
+つまり、ほとんど@<hd>{threadpool|IPCThreadStateのioctl()呼び出しループ - joinThreadPool()メソッドとBBinder}と@<hd>{threadpool|サービスのプロキシとBpBinderの使い方}の二つの節の内容の繰り返しとなります。
 
 
 === サービスの実装 - BnInterfaceのサブクラスの実装
@@ -616,7 +616,7 @@ class BnMyService1 : public BnInterface<IMyService1> {
 };
 //}
 
-このonTransactについての説明は8.6.4の内容と完全に同じです。
+このonTransactについての説明は@<hd>{threadpool|IPCThreadStateのioctl()呼び出しループ - joinThreadPool()メソッドとBBinder}の内容と完全に同じです。
 ただ、BBinderと大きく違う所としては、BnInterfaceには/* 1 */にあるように、インターフェースクラスを受け取るテンプレート引数がある事です。
 この結果、BnMyService1はIMyService1も継承するように展開されます。
 
@@ -715,7 +715,7 @@ https://developer.android.com/reference/android/os/StrictMode.html
 === サービスプロキシの実装 - BpInterfaceのサブクラスの実装
 
 サービスプロキシは、BpInterfaceを継承して実装します。
-内容はBpBinderの時の8.6.6とほとんど同じです。
+内容はBpBinderの時の@<hd>{threadpool|サービスのプロキシとBpBinderの使い方}とほとんど同じです。
 
 まずはBpInterfaceを継承したBpMyService1の宣言から見てみましょう。
 
@@ -733,7 +733,7 @@ IBinderは前にも言った通り実体は大きくBpBinderとBBinderのケー�
 BBInderの時はBnInterface側のクラスにキャストされるだけなので、こちらのクラスには渡ってきません。
 
 BpInterfaceクラスは、コンストラクタで渡されたBpBinderをremote()というアクセサで参照できます。
-このBpBinderのtransact()を用いてプロキシを作るのは、8.6.6で解説した手順とほとんど同じです。
+このBpBinderのtransact()を用いてプロキシを作るのは、@<hd>{threadpool|サービスのプロキシとBpBinderの使い方}で解説した手順とほとんど同じです。
 
 試しにadd()を実装してみましょう。
 
@@ -770,7 +770,7 @@ public:
 //}
 
 
-実装としては8.6.6とほとんど同じ内容となっています。
+実装としては@<hd>{threadpool|サービスのプロキシとBpBinderの使い方}とほとんど同じ内容となっています。
 違うのはテンプレート引数、コンストラクタ、writeInterfaceTokenくらいでしょうか。
 この3つを簡単に解説します。
 
@@ -787,7 +787,7 @@ public:
     BpMyService(const sp<IBinder> &remote) : BpInterface<IMyService>(remote) {}
 //}
 
-/* 3 */ add()の中は、writeInterfaceToken()の所だけ8.6.6の実装(@<list>{threadpool|bpbinder_usage})と異なっていますね。
+/* 3 */ add()の中は、writeInterfaceToken()の所だけ@<hd>{threadpool|サービスのプロキシとBpBinderの使い方}の実装(@<list>{threadpool|bpbinder_usage})と異なっていますね。
 以下のコードです。
 
 //list[proxydiff][前の例(@<list>{threadpool|bpbinder_usage})との差分]{
@@ -848,7 +848,7 @@ sp<IMyService1> intr = interface_cast<IMyServce1>(defaultServiceManager()->getSe
 普通はこのinterface_castを使う方が読みやすく意図も分かりやすいので良いと思います。
 ですがasInterface()もJavaの方でも同名のメソッドがあって役割は同じなので、知っておくと良いでしょう。
 
-== 8.7.8 共通ネイティブインターフェースまとめ
+== 共通ネイティブインターフェースまとめ
 
 以上で、共通ネイティブインターフェースのレイヤの説明を終わりました。
 
